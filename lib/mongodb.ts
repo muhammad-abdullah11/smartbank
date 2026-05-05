@@ -1,0 +1,19 @@
+import mongoose from "mongoose";
+
+
+export async function connectDB() {
+    if (mongoose.connections[0].readyState === 1) {
+        return;
+    }
+    try {
+        const MONGODB_URI = "mongodb://localhost:27017/smart-bank";
+        if (!MONGODB_URI) {
+            throw new Error("Please provide MONGO_URL in the environment variables");
+        }
+        const conn = await mongoose.connect(MONGODB_URI);
+        console.log(`MongoDB connected: ${conn.connection.host}`);
+    } catch (error) {
+        console.log(error);
+        throw new Error("Failed to connect to MongoDB");
+    }
+}
