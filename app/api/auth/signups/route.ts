@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { connectDB } from '@/lib/mongodb';
 import User from '@/Models/user.Model';
+import { sendVerificationEmail } from '@/lib/nodemailer';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,6 +29,9 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
     const user = await User.create({
       fullName,
       email,
@@ -34,7 +39,11 @@ export async function POST(request: NextRequest) {
       password: hashedPassword,
       accountType: accountType || 'savings',
       address,
+      otp,
+      otpExpiry,
     });
+
+    await sendVerificationEmail(email, otp);
 
     const userResponse = user.toObject();
     userResponse.password="";
