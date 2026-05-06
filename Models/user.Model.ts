@@ -32,6 +32,8 @@ export interface IUser extends Document {
   accountType: 'savings' | 'current' | 'salary';
   balance: number;
   isEmailVerified: boolean;
+  otp?: string;
+  otpExpiry?: Date;
   address: {
     street: string;
     city: string;
