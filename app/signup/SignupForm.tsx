@@ -1,6 +1,14 @@
 'use client'
-import { useState } from 'react'
+import { useState, type ChangeEvent, type FormEvent, type FocusEvent } from 'react'
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCalendar, FaHome } from 'react-icons/fa'
+
+interface Address {
+  street: string
+  city: string
+  state: string
+  postalCode: string
+  country: string
+}
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -15,7 +23,7 @@ export default function SignupForm() {
       state: '',
       postalCode: '',
       country: ''
-    }
+    } as Address
   })
   const [errors, setErrors] = useState({
     fullName: '',
@@ -33,10 +41,10 @@ export default function SignupForm() {
   })
   const [showPassword, setShowPassword] = useState(false)
 
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  const validatePassword = (password) => password.length >= 8
+  const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const validatePassword = (password: string): boolean => password.length >= 8
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     if (name.startsWith('address.')) {
       const field = name.split('.')[1]
@@ -47,18 +55,18 @@ export default function SignupForm() {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }))
     }
-    if (touched[name]) {
+    if (touched[name as keyof typeof touched]) {
       validateField(name, value)
     }
   }
 
-  const handleBlur = (e) => {
+  const handleBlur = (e: FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setTouched(prev => ({ ...prev, [name]: true }))
     validateField(name, value)
   }
 
-  const validateField = (name, value) => {
+  const validateField = (name: string, value: string) => {
     let error = ''
     switch (name) {
       case 'fullName':
@@ -73,8 +81,9 @@ export default function SignupForm() {
         else {
           const dob = new Date(value)
           const today = new Date()
+          const age = today.getFullYear() - dob.getFullYear()
           if (dob > today) error = 'Date of birth cannot be in the future'
-          else if (today.getFullYear() - dob.getFullYear() < 18) error = 'Must be at least 18 years old'
+          else if (age < 18) error = 'You must be at least 18 years old'
         }
         break
       case 'password':
@@ -94,17 +103,18 @@ export default function SignupForm() {
     setErrors(prev => ({ ...prev, [name]: error }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setTouched({
+    const allTouched = {
       fullName: true,
       email: true,
       dateOfBirth: true,
       password: true,
       address: true
-    })
-    let isValid = true
+    }
+    setTouched(allTouched)
     const newErrors = { ...errors }
+    let isValid = true
 
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Full name is required'
@@ -128,7 +138,9 @@ export default function SignupForm() {
       newErrors.password = 'Password must be at least 8 characters'
       isValid = false
     }
-    if (!formData.address.street.trim() || !formData.address.city.trim() || !formData.address.state.trim() || !formData.address.postalCode.trim() || !formData.address.country.trim()) {
+    if (!formData.address.street.trim() || !formData.address.city.trim() || 
+        !formData.address.state.trim() || !formData.address.postalCode.trim() || 
+        !formData.address.country.trim()) {
       newErrors.address = 'Complete address is required'
       isValid = false
     }
@@ -139,9 +151,9 @@ export default function SignupForm() {
     }
   }
 
-  const getInputClass = (field) => {
+  const getInputClass = (field: string) => {
     const base = 'block w-full py-1 border text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1'
-    if (touched[field] && errors[field]) {
+    if (touched[field as keyof typeof touched] && errors[field as keyof typeof errors]) {
       return base + ' pl-10 pr-3 border-red-300 focus:ring-red-500 focus:border-red-500'
     }
     return base + ' pl-10 pr-3 border-gray-300 focus:ring-blue-500 focus:border-blue-500'
@@ -183,7 +195,7 @@ export default function SignupForm() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   className={getInputClass('fullName')}
-                  placeholder="name?"
+                  placeholder="John Doe"
                 />
               </div>
               {touched.fullName && errors.fullName && (
