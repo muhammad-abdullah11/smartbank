@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
 
     sender.balance        -= amount;
     sender.usedDailyLimit  = (sender.usedDailyLimit || 0) + amountInPaisas;
-    sender.usedMonthlyLimit = new Date();
+     sender.usedMonthlyLimit = (sender.usedMonthlyLimit || 0) + amountInPaisas;
     await sender.save({ session: dbSession });
 
     receiver.balance += amount;

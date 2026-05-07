@@ -50,8 +50,8 @@ export interface IUser extends Document {
   
   dailyTransactionLimit: number;
   monthlyTransactionLimit: number;
-  usedDailyLimit: number;
-  usedMonthlyLimit: Date;
+   usedDailyLimit: number;
+   usedMonthlyLimit: number;
     
   isAccountLocked(): boolean;
   incrementLoginAttempts(): Promise<void>;
@@ -178,8 +178,10 @@ const UserSchema = new Schema<IUser>(
       set: (v: number) => v * 100,
     },
     usedMonthlyLimit: {
-      type: Date,
-      default: Date.now,
+      type: Number,
+      default: 0,
+      get: (v: number) => v / 100,
+      set: (v: number) => v * 100,
     },
   },
   {
