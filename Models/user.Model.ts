@@ -54,6 +54,8 @@ export interface IUser extends Document {
   usedMonthlyLimit: Date;
     
   isAccountLocked(): boolean;
+  incrementLoginAttempts(): Promise<void>;
+  resetLoginAttempts(): Promise<void>;
 }
 
 const UserSchema = new Schema<IUser>(

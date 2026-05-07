@@ -137,14 +137,6 @@ TransitionsSchema.index({ account: 1, createdAt: -1 });
 TransitionsSchema.index({ idempotencyKey: 1 });
 TransitionsSchema.index({ status: 1, createdAt: -1 });
 
-function preventDelete(next: (err?: Error) => void) {
-  next(new Error("Transitions cannot be deleted"));
-}
-
-TransitionsSchema.pre("deleteOne", preventDelete);
-TransitionsSchema.pre("deleteMany", preventDelete);
-TransitionsSchema.pre("findOneAndDelete", preventDelete);
-
 export const Transitions =
   (mongoose.models.Transitions ) ||
   mongoose.model<ITransitions>("Transitions", TransitionsSchema);
