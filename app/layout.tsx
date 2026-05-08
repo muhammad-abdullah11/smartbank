@@ -1,10 +1,7 @@
-'use client'
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { usePathname } from "next/navigation";
 import "./globals.css";
-import Navbar from "@/Components/Navbar";
+import ClientLayout from "@/Components/ClientLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,34 +13,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: "SmartBank - Online Banking",
+  description: "Secure online banking services with SmartBank",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  
-  const authRoutes = [
-    '/signup',
-    '/verify-email',
-    '/forgot-password',
-    '/reset-password',
-    '/login',
-    '/register',
-  ];
-  
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {!isAuthRoute && <Navbar />}
-        <main className={`${!isAuthRoute ? 'lg:ml-64' : ''} min-h-screen bg-gray-50`}>
-          {children}
-        </main>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
