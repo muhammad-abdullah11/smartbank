@@ -5,7 +5,8 @@ import { connectDB } from "@/lib/mongodb";
 import Loan from "@/Models/loan.Model";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+
+    const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
     return NextResponse.json(
@@ -17,7 +18,7 @@ export async function GET() {
   try {
     await connectDB();
 
-    const loans = await Loan.find({user:session.user.id});
+    const loans = await Loan.find({user:session.user.id}).populate("user","fullName");
 
     if(!loans){
         return NextResponse.json({message:"Loans not found request from that user"},{status:404})
