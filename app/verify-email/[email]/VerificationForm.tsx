@@ -1,19 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { useRouter, useParams } from 'next/navigation'
 
 export default function VerificationForm() {
+  const router = useRouter()
+  const params = useParams()
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [touched, setTouched] = useState(false)
   const [timer, setTimer] = useState(60)
   const [canResend, setCanResend] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [apiError, setApiError] = useState('')
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem('signup_email')
-    if (savedEmail) setEmail(savedEmail)
-    
+    if (params.email) {
+      const decodedEmail = decodeURIComponent(params.email as string)
+      setEmail(decodedEmail)
+    }
+  }, [params.email])
+
+  useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => {
         setTimer(prev => {
@@ -80,21 +90,38 @@ export default function VerificationForm() {
     return true
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setTouched(true)
     const code = otp.join('')
     
     if (!validateOtp(code)) return
     
-    console.log('Verifying OTP:', code, 'for email:', email)
+    setLoading(true)
+    setApiError('')
+    try {
+      await axios.post('/api/auth/verify-otp', { email, otp: code })
+      router.push('/login?verified=true')
+    } catch (error: any) {
+      setApiError(error.response?.data?.error || 'Verification failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleResend = () => {
-    setTimer(60)
-    setCanResend(false)
-    setOtp(['', '', '', '', '', ''])
-    console.log('Resending OTP to:', email)
+  const handleResend = async () => {
+    setLoading(true)
+    setApiError('')
+    try {
+      await axios.post('/api/auth/send-otp', { email })
+      setTimer(60)
+      setCanResend(false)
+      setOtp(['', '', '', '', '', ''])
+    } catch (error: any) {
+      setApiError(error.response?.data?.error || 'Failed to resend OTP. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -137,11 +164,16 @@ export default function VerificationForm() {
 
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            Verify email
+            {loading ? 'Verifying...' : 'Verify email'}
           </button>
         </form>
+
+        {apiError && (
+          <p className="mt-4 text-center text-xs text-red-600">{apiError}</p>
+        )}
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">

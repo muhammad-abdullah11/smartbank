@@ -118,6 +118,12 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    otp: {
+      type: String,
+    },
+    otpExpiry: {
+      type: Date,
+    },
     address: {
       street: {
         type: String,

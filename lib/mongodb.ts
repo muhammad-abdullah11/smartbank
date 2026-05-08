@@ -6,7 +6,7 @@ export async function connectDB() {
         return;
     }
     try {
-        const MONGODB_URI = "mongodb://localhost:27017/smart-bank";
+        const MONGODB_URI = "mongodb://localhost:27017/smart-bankI";
         if (!MONGODB_URI) {
             throw new Error("Please provide MONGO_URL in the environment variables");
         }

@@ -1,5 +1,7 @@
 'use client'
 import { useState, type ChangeEvent, type FormEvent, type FocusEvent } from 'react'
+import axios from 'axios'
+import { useRouter } from 'next/navigation'
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCalendar, FaHome } from 'react-icons/fa'
 
 interface Address {
@@ -11,6 +13,7 @@ interface Address {
 }
 
 export default function SignupForm() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -40,6 +43,8 @@ export default function SignupForm() {
     address: false
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [apiError, setApiError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const validatePassword = (password: string): boolean => password.length >= 8
@@ -103,7 +108,7 @@ export default function SignupForm() {
     setErrors(prev => ({ ...prev, [name]: error }))
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const allTouched = {
       fullName: true,
@@ -147,7 +152,16 @@ export default function SignupForm() {
 
     setErrors(newErrors)
     if (isValid) {
-      console.log('Form submitted', formData)
+      setLoading(true)
+      setApiError('')
+      try {
+        await axios.post('/api/auth/signups', formData)
+        router.push('/verify-email/' + encodeURIComponent(formData.email))
+      } catch (error: any) {
+        setApiError(error.response?.data?.error || 'Registration failed. Please try again.')
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
@@ -376,11 +390,16 @@ export default function SignupForm() {
           <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-1 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500"
+              disabled={loading}
+              className="w-full flex justify-center py-1 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 disabled:opacity-50"
             >
-              Sign up
+              {loading ? 'Signing up...' : 'Sign up'}
             </button>
           </div>
+
+          {apiError && (
+            <p className="text-center text-xs text-red-600">{apiError}</p>
+          )}
         </form>
       </div>
     </div>

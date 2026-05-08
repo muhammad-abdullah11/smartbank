@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+otp +otpExpiry');
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
