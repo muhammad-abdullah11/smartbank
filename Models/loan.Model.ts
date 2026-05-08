@@ -8,7 +8,7 @@ const loanSchema = new mongoose.Schema(
     reason: { type: String },
     status: {
       type: String,
-      enum: ["PENDING", "APPROVED", "REJECTED"],
+      enum: ["PENDING", "APPROVED", "REJECTED","RETURNED"],
       default: "PENDING",
     },
   },
