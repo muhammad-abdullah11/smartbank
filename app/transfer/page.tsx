@@ -1,309 +1,229 @@
 'use client'
+import { useState, type ChangeEvent, type FormEvent } from 'react'
+import axios from 'axios'
+import { useRouter } from 'next/navigation'
+import { FaExchangeAlt, FaPaperPlane, FaUser } from 'react-icons/fa'
 
-import React, { useState } from 'react'
-import { FaExchangeAlt, FaEnvelope, FaCreditCard, FaDollarSign, FaFileAlt, FaTimes, FaCheck, FaSpinner } from 'react-icons/fa'
+export default function TransferPage() {
+  const router = useRouter()
+  const [formData, setFormData] = useState({
+    toAccountNumber: '',
+    amount: '',
+    description: ''
+  })
+  const [errors, setErrors] = useState({
+    toAccountNumber: '',
+    amount: '',
+    description: ''
+  })
+  const [touched, setTouched] = useState({
+    toAccountNumber: false,
+    amount: false
+  })
+  const [loading, setLoading] = useState(false)
+  const [apiMessage, setApiMessage] = useState({ type: '', message: '' })
 
-export default function Transfer() {
-  const [transferType, setTransferType] = useState('account')
-  const [accountNumber, setAccountNumber] = useState('')
-  const [email, setEmail] = useState('')
-  const [amount, setAmount] = useState('')
-  const [description, setDescription] = useState('')
-  const [errors, setErrors] = useState({})
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const validateAccountNumber = (value) => {
-    return /^[A-Z0-9]{16}$/.test(value)
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    if (touched[name as keyof typeof touched]) {
+      validateField(name, value)
+    }
+    setApiMessage({ type: '', message: '' })
   }
 
-  const validateEmail = (value) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  const handleBlur = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setTouched(prev => ({ ...prev, [name]: true }))
+    validateField(name, value)
   }
 
-  const validateForm = () => {
-    const newErrors = {}
-
-    if (transferType === 'account') {
-      if (!accountNumber.trim()) {
-        newErrors.accountNumber = 'Account number is required'
-      } else if (!validateAccountNumber(accountNumber)) {
-        newErrors.accountNumber = 'Account number must be 16 alphanumeric characters (e.g., 27DA13BC8EE78B1F)'
-      }
-    } else {
-      if (!email.trim()) {
-        newErrors.email = 'Email is required'
-      } else if (!validateEmail(email)) {
-        newErrors.email = 'Please enter a valid email address'
-      }
+  const validateField = (name: string, value: string) => {
+    let error = ''
+    switch (name) {
+      case 'toAccountNumber':
+        if (!value.trim()) error = 'Account number or email is required'
+        break
+      case 'amount':
+        if (!value) error = 'Amount is required'
+        else if (isNaN(Number(value)) || Number(value) <= 0) error = 'Please enter a valid amount'
+        else if (Number(value) < 1) error = 'Minimum transfer amount is RS 1'
+        break
+      default:
+        break
     }
+    setErrors(prev => ({ ...prev, [name]: error }))
+  }
 
-    if (!amount || parseFloat(amount) <= 0) {
-      newErrors.amount = 'Amount must be greater than 0'
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const allTouched = { toAccountNumber: true, amount: true }
+    setTouched(allTouched)
+    
+    let isValid = true
+    const newErrors = { ...errors }
+    
+    if (!formData.toAccountNumber.trim()) {
+      newErrors.toAccountNumber = 'Account number or email is required'
+      isValid = false
     }
-
+    if (!formData.amount) {
+      newErrors.amount = 'Amount is required'
+      isValid = false
+    } else if (isNaN(Number(formData.amount)) || Number(formData.amount) <= 0) {
+      newErrors.amount = 'Please enter a valid amount'
+      isValid = false
+    }
+    
     setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSend = () => {
-    if (validateForm()) {
-      setShowConfirm(true)
+    
+    if (isValid) {
+      setLoading(true)
+      setApiMessage({ type: '', message: '' })
+      try {
+        const response = await axios.post('/api/transactions', {
+          toAccountNumber: formData.toAccountNumber,
+          amount: Number(formData.amount),
+          description: formData.description || undefined
+        })
+        
+        if (response.data.success) {
+          setApiMessage({ type: 'success', message: response.data.message || 'Transfer completed successfully!' })
+          setFormData({ toAccountNumber: '', amount: '', description: '' })
+          setTouched({ toAccountNumber: false, amount: false })
+        } else {
+          setApiMessage({ type: 'error', message: response.data.message || 'Transfer failed. Please try again.' })
+        }
+      } catch (error: any) {
+        setApiMessage({ 
+          type: 'error', 
+          message: error.response?.data?.message || 'Transfer failed. Please try again.' 
+        })
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
-  const handleConfirm = async () => {
-    setIsSubmitting(true)
-    try {
-      const payload = {
-        toAccountNumber: transferType === 'account' ? accountNumber : email,
-        amount: parseFloat(amount),
-        description,
-      }
-
-      const response = await fetch('/api/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-idempotency-key': `${Date.now()}-${Math.random()}`,
-        },
-        body: JSON.stringify(payload),
-      })
-
-      if (response.ok) {
-        setAccountNumber('')
-        setEmail('')
-        setAmount('')
-        setDescription('')
-        setShowConfirm(false)
-        alert('Transfer completed successfully!')
-      } else {
-        const data = await response.json()
-        alert(data.message || 'Transfer failed')
-      }
-    } catch (error) {
-      alert('An error occurred. Please try again.')
-    } finally {
-      setIsSubmitting(false)
+  const getInputClass = (field: string) => {
+    const base = 'block w-full py-2 border text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1 pl-10 pr-3'
+    if (touched[field as keyof typeof touched] && errors[field as keyof typeof errors]) {
+      return base + ' border-red-300 focus:ring-red-500 focus:border-red-500'
     }
+    return base + ' border-gray-300 focus:ring-blue-500 focus:border-blue-500'
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8 md:p-8">
+    <main className="min-h-screen bg-gray-50 px-4 py-16  md:p-4 sm:p-6 lg:p-8">
       <section className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <FaExchangeAlt className="text-2xl text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Send Money</h1>
-          </div>
-          <p className="text-gray-600 text-sm md:text-base">Transfer funds to another account securely</p>
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Send Money</h1>
+          <p className="mt-1 text-sm text-gray-600">Transfer funds to another SmartBank account</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">Transfer Method</label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-3 cursor-pointer">
+        <section className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+          <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+            <div>
+              <label htmlFor="toAccountNumber" className="block text-sm font-medium text-gray-700">Recipient (Email or Account Number)</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaUser className="h-4 w-4 text-gray-400" />
+                </div>
                 <input
-                  type="radio"
-                  name="transferType"
-                  value="account"
-                  checked={transferType === 'account'}
-                  onChange={(e) => {
-                    setTransferType(e.target.value)
-                    setErrors({})
-                    setEmail('')
-                  }}
-                  className="w-4 h-4 text-blue-600"
+                  id="toAccountNumber"
+                  name="toAccountNumber"
+                  type="text"
+                  autoComplete="off"
+                  value={formData.toAccountNumber}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={getInputClass('toAccountNumber')}
+                  placeholder="Enter email or account number"
                 />
-                <span className="text-gray-700 font-medium">Account Number</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="transferType"
-                  value="email"
-                  checked={transferType === 'email'}
-                  onChange={(e) => {
-                    setTransferType(e.target.value)
-                    setErrors({})
-                    setAccountNumber('')
-                  }}
-                  className="w-4 h-4 text-blue-600"
-                />
-                <span className="text-gray-700 font-medium">Email</span>
-              </label>
-            </div>
-          </div>
-
-          {transferType === 'account' ? (
-            <div className="mb-6">
-              <label htmlFor="accountNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <FaCreditCard className="text-blue-600" />
-                  Account Number
-                </div>
-              </label>
-              <input
-                id="accountNumber"
-                type="text"
-                value={accountNumber}
-                onChange={(e) => {
-                  setAccountNumber(e.target.value.toUpperCase())
-                  if (errors.accountNumber) setErrors({ ...errors, accountNumber: '' })
-                }}
-                placeholder="27DA13BC8EE78B1F"
-                maxLength="16"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase ${
-                  errors.accountNumber ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.accountNumber && <p className="text-red-600 text-sm mt-1">{errors.accountNumber}</p>}
-            </div>
-          ) : (
-            <div className="mb-6">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                <div className="flex items-center gap-2">
-                  <FaEnvelope className="text-blue-600" />
-                  Email Address
-                </div>
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value)
-                  if (errors.email) setErrors({ ...errors, email: '' })
-                }}
-                placeholder="user@example.com"
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
-            </div>
-          )}
-
-          <div className="mb-6">
-            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-              <div className="flex items-center gap-2">
-                <FaDollarSign className="text-blue-600" />
-                Amount
               </div>
-            </label>
-            <input
-              id="amount"
-              type="number"
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value)
-                if (errors.amount) setErrors({ ...errors, amount: '' })
-              }}
-              placeholder="0.00"
-              step="0.01"
-              min="0"
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.amount ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            {errors.amount && <p className="text-red-600 text-sm mt-1">{errors.amount}</p>}
-          </div>
-
-          <div className="mb-8">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-              <div className="flex items-center gap-2">
-                <FaFileAlt className="text-blue-600" />
-                Description (Optional)
-              </div>
-            </label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add a note for this transfer..."
-              rows={3}
-              maxLength={255}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-            <p className="text-gray-500 text-xs mt-1">{description.length}/255</p>
-          </div>
-
-          <button
-            onClick={handleSend}
-            disabled={isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <FaExchangeAlt />
-            Send Money
-          </button>
-        </div>
-      </section>
-
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 md:p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Confirm Transfer</h2>
-              <button
-                onClick={() => setShowConfirm(false)}
-                disabled={isSubmitting}
-                className="text-gray-500 hover:text-gray-700 disabled:opacity-50"
-              >
-                <FaTimes className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4 mb-6 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600 text-sm">Recipient:</span>
-                <span className="font-semibold text-gray-900">{transferType === 'account' ? accountNumber : email}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 text-sm">Amount:</span>
-                <span className="font-semibold text-green-600">${parseFloat(amount).toFixed(2)}</span>
-              </div>
-              {description && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600 text-sm">Note:</span>
-                  <span className="font-semibold text-gray-900">{description}</span>
-                </div>
+              {touched.toAccountNumber && errors.toAccountNumber && (
+                <p className="mt-0.5 text-xs text-red-600">{errors.toAccountNumber}</p>
               )}
             </div>
 
-            <p className="text-gray-600 text-sm mb-6">
-              Please review the details above. This action cannot be undone.
-            </p>
+            <div>
+              <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount (RS)</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-400 text-sm">RS</span>
+                </div>
+                <input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  inputMode="decimal"
+                  min="1"
+                  step="0.01"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={getInputClass('amount')}
+                  placeholder="0.00"
+                />
+              </div>
+              {touched.amount && errors.amount && (
+                <p className="mt-0.5 text-xs text-red-600">{errors.amount}</p>
+              )}
+            </div>
 
-            <div className="flex gap-3">
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description (Optional)</label>
+              <div className="mt-1">
+                <input
+                  id="description"
+                  name="description"
+                  type="text"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="block w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  placeholder="What's this transfer for?"
+                />
+              </div>
+            </div>
+
+            {apiMessage.message && (
+              <div className={`p-3 rounded-md text-sm ${
+                apiMessage.type === 'success' 
+                  ? 'bg-green-50 text-green-700 border border-green-200' 
+                  : 'bg-red-50 text-red-700 border border-red-200'
+              }`}>
+                {apiMessage.message}
+              </div>
+            )}
+
+            <div>
               <button
-                onClick={() => setShowConfirm(false)}
-                disabled={isSubmitting}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 disabled:opacity-50"
               >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={isSubmitting}
-                className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <FaSpinner className="animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <FaCheck />
-                    Confirm
-                  </>
-                )}
+                <FaPaperPlane className="w-4 h-4" />
+                {loading ? 'Processing...' : 'Send Money'}
               </button>
             </div>
+          </form>
+        </section>
+
+        <section className="mt-6 bg-blue-50 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <FaExchangeAlt className="text-blue-600 mt-0.5" />
+            <div className="text-sm text-blue-700">
+              <p className="font-medium">Transfer Information</p>
+              <ul className="mt-1 space-y-1">
+                <li>• Transfers are processed immediately</li>
+                <li>• You can send to email or account number</li>
+                <li>• Daily and monthly limits apply</li>
+                <li>• No fees for SmartBank transfers</li>
+              </ul>
+            </div>
           </div>
-        </div>
-      )}
+        </section>
+      </section>
     </main>
   )
 }

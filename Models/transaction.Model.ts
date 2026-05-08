@@ -84,8 +84,6 @@ const TransitionsSchema = new Schema<ITransitions>(
       type:     Number,
       required: true,
       min:      1,
-      get:      (v: number) => v / 100,
-      set:      (v: number) => Math.round(v * 100),
     },
     fee: { 
       type: FeeSchema, 

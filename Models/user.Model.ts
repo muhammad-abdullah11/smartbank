@@ -111,8 +111,6 @@ const UserSchema = new Schema<IUser>(
       type: Number,
       default: 0,
       min: [0, 'Balance cannot be negative'],
-      get: (v: number) => v / 100, 
-      set: (v: number) => Math.round(v * 100),
     },
     isEmailVerified: {
       type: Boolean,
@@ -167,27 +165,19 @@ const UserSchema = new Schema<IUser>(
     
     dailyTransactionLimit: {
       type: Number,
-      default: 500000, 
-      get: (v: number) => v / 100,
-      set: (v: number) => v * 100,
+      default: 5000,
     },
     monthlyTransactionLimit: {
       type: Number,
-      default: 10000000, // $10,000
-      get: (v: number) => v / 100,
-      set: (v: number) => v * 100,
+      default: 100000,
     },
     usedDailyLimit: {
       type: Number,
       default: 0,
-      get: (v: number) => v / 100,
-      set: (v: number) => v * 100,
     },
     usedMonthlyLimit: {
       type: Number,
       default: 0,
-      get: (v: number) => v / 100,
-      set: (v: number) => v * 100,
     },
   },
   {

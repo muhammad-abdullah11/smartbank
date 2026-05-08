@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const isEmail = toAccountNumber.includes('@');
   const idempotencyKey = req.headers.get("x-idempotency-key") || uuid();
 
   const duplicate = await Transitions.findOne({ idempotencyKey });
@@ -42,109 +43,144 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const dbSession = await mongoose.startSession();
-  dbSession.startTransaction();
+  const isReplicaSet = process.env.MONGODB_REPLICA_SET === 'true';
+  
+  let dbSession: any = null;
+  if (isReplicaSet) {
+    dbSession = await mongoose.startSession();
+    dbSession.startTransaction();
+  }
 
   try {
-
-    const sender = await User.findById(session.user.id)
-      .select("+balance +accountStatus +accountLockedUntil +failedLoginAttempts +dailyTransactionLimit +monthlyTransactionLimit +usedDailyLimit +usedMonthlyLimit")
-      .session(dbSession);
+    const senderSelect = "balance accountStatus accountLockedUntil failedLoginAttempts dailyTransactionLimit monthlyTransactionLimit usedDailyLimit usedMonthlyLimit";
+    
+    let sender;
+    if (isReplicaSet && dbSession) {
+      sender = await User.findById(session.user.id)
+        .select(senderSelect)
+        .session(dbSession);
+    } else {
+      sender = await User.findById(session.user.id)
+        .select(senderSelect);
+    }
 
     if (!sender) {
-      await dbSession.abortTransaction();
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Sender not found" }, { status: 404 });
     }
 
     if (sender.accountStatus !== "active") {
-      await dbSession.abortTransaction();
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Your account is not active" }, { status: 403 });
     }
 
     if (sender.isAccountLocked()) {
-      await dbSession.abortTransaction();
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Your account is temporarily locked" }, { status: 403 });
     }
 
-    const receiver = await User.findOne({ accountNumber: toAccountNumber })
-      .select("+balance +accountStatus")
-      .session(dbSession);
+    const receiverQuery = isEmail ? { email: toAccountNumber } : { accountNumber: toAccountNumber };
+    
+    let receiver;
+    if (isReplicaSet && dbSession) {
+      receiver = await User.findOne(receiverQuery)
+        .select("balance accountStatus")
+        .session(dbSession);
+    } else {
+      receiver = await User.findOne(receiverQuery)
+        .select("balance accountStatus");
+    }
 
     if (!receiver) {
-      await dbSession.abortTransaction();
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Receiver account not found" }, { status: 404 });
     }
 
     if (receiver.accountStatus !== "active") {
-      await dbSession.abortTransaction();
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Receiver account is not active" }, { status: 400 });
     }
 
     if (sender._id.toString() === receiver._id.toString()) {
-      await dbSession.abortTransaction();
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Cannot transfer to your own account" }, { status: 400 });
     }
 
     if (sender.balance < amount) {
-      await dbSession.abortTransaction();
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Insufficient balance" }, { status: 400 });
     }
 
-    const amountInPaisas = Math.round(amount * 100);
+    const amountInCents = Math.round(amount * 100);
 
-    if (sender.usedDailyLimit + amountInPaisas > sender.dailyTransactionLimit) {
-      await dbSession.abortTransaction();
+    if ((sender.usedDailyLimit || 0) + amount > sender.dailyTransactionLimit) {
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Daily transaction limit exceeded" }, { status: 400 });
     }
 
-    if (sender.usedMonthlyLimit + amountInPaisas > sender.monthlyTransactionLimit) {
-      await dbSession.abortTransaction();
+    if ((sender.usedMonthlyLimit || 0) + amount > sender.monthlyTransactionLimit) {
+      if (isReplicaSet && dbSession) await dbSession.abortTransaction();
       return NextResponse.json({ success: false, message: "Monthly transaction limit exceeded" }, { status: 400 });
     }
 
-    await Transitions.create(
-      [
-        {
-          fromAccount:    sender._id,
-          toAccount:      receiver._id,
-          fromUser:       sender._id,
-          toUser:         receiver._id,
-          account:        sender._id,
-          amount:         amountInPaisas,
-          ledgerType:     LedgerType.DEBIT,
-          type:           TransactionType.TRANSFER,
-          status:         TransactionStatus.COMPLETED,
-          idempotencyKey,
-          description:    description || `Transfer to ${receiver.accountNumber}`,
-          fee:            { amount: 0, description: "Service fee" },
-        },
-        {
-          fromAccount:    sender._id,
-          toAccount:      receiver._id,
-          fromUser:       sender._id,
-          toUser:         receiver._id,
-          account:        receiver._id,
-          amount:         amountInPaisas,
-          ledgerType:     LedgerType.CREDIT,
-          type:           TransactionType.TRANSFER,
-          status:         TransactionStatus.COMPLETED,
-          idempotencyKey: `${idempotencyKey}_credit`,
-          description:    description || `Transfer from ${sender.accountNumber}`,
-          fee:            { amount: 0, description: "Service fee" },
-        },
-      ],
-      { session: dbSession }
-    );
+    const transactionData = [
+      {
+        fromAccount:    sender._id,
+        toAccount:      receiver._id,
+        fromUser:       sender._id,
+        toUser:         receiver._id,
+        account:        sender._id,
+        amount:         amount,
+        ledgerType:     LedgerType.DEBIT,
+        type:           TransactionType.TRANSFER,
+        status:         TransactionStatus.COMPLETED,
+        idempotencyKey,
+        description:    description || `Transfer to ${receiver.accountNumber}`,
+        fee:            { amount: 0, description: "Service fee" },
+      },
+      {
+        fromAccount:    sender._id,
+        toAccount:      receiver._id,
+        fromUser:       sender._id,
+        toUser:         receiver._id,
+        account:        receiver._id,
+        amount:         amount,
+        ledgerType:     LedgerType.CREDIT,
+        type:           TransactionType.TRANSFER,
+        status:         TransactionStatus.COMPLETED,
+        idempotencyKey: `${idempotencyKey}_credit`,
+        description:    description || `Transfer from ${sender.accountNumber}`,
+        fee:            { amount: 0, description: "Service fee" },
+      },
+    ];
+
+    if (isReplicaSet && dbSession) {
+      await Transitions.create(transactionData, { session: dbSession });
+    } else {
+      await Transitions.create(transactionData);
+    }
 
     sender.balance        -= amount;
-    sender.usedDailyLimit  = (sender.usedDailyLimit || 0) + amountInPaisas;
-     sender.usedMonthlyLimit = (sender.usedMonthlyLimit || 0) + amountInPaisas;
-    await sender.save({ session: dbSession });
+    sender.usedDailyLimit  = (sender.usedDailyLimit || 0) + amount;
+    sender.usedMonthlyLimit = (sender.usedMonthlyLimit || 0) + amount;
+    
+    if (isReplicaSet && dbSession) {
+      await sender.save({ session: dbSession });
+    } else {
+      await sender.save();
+    }
 
     receiver.balance += amount;
-    await receiver.save({ session: dbSession });
+    if (isReplicaSet && dbSession) {
+      await receiver.save({ session: dbSession });
+    } else {
+      await receiver.save();
+    }
 
-    await dbSession.commitTransaction();
+    if (isReplicaSet && dbSession) {
+      await dbSession.commitTransaction();
+      dbSession.endSession();
+    }
 
     return NextResponse.json(
       {
@@ -160,10 +196,11 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (err: unknown) {
-    await dbSession.abortTransaction();
+    if (isReplicaSet && dbSession) {
+      await dbSession.abortTransaction();
+      dbSession.endSession();
+    }
     const message = err instanceof Error ? err.message : "Transaction failed";
     return NextResponse.json({ success: false, message }, { status: 500 });
-  } finally {
-    dbSession.endSession();
   }
 }

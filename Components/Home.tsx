@@ -77,7 +77,7 @@ export default function Home() {
               <FaUser className="text-blue-600" />
               <p className="text-xs md:text-sm text-gray-600">Balance</p>
             </div>
-            <p className="text-lg md:text-xl font-bold text-green-600">${(user?.balance || 0).toFixed(2)}</p>
+            <p className="text-lg md:text-xl font-bold text-green-600">RS {(user?.balance || 0).toFixed(2)}</p>
           </div>
           
           <div className="bg-white p-3 md:p-6 rounded-lg shadow-sm">
