@@ -25,7 +25,7 @@ export default function Navbar() {
         {!mobileOpen &&(
             <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white shadow-md text-gray-700"
+            className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-white dark:bg-gray-800 shadow-md text-gray-700 dark:text-gray-300"
             aria-label="Open menu"
             >
         <FaBars className="w-5 h-5" />
@@ -35,9 +35,9 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 flex lg:hidden">
           <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <nav className="relative w-64 bg-white h-full shadow-lg flex flex-col p-4">
+          <nav className="relative w-64 bg-white dark:bg-gray-800 h-full shadow-lg flex flex-col p-4">
             <div className="mb-8 px-4 py-3 flex items-center justify-between">
-              <h1 className="text-xl font-bold text-blue-600">SmartBank</h1>
+              <h1 className="text-xl font-bold text-blue-600 dark:text-blue-400">SmartBank</h1>
               <button onClick={() => setMobileOpen(false)} aria-label="Close menu">
                 <FaTimes className="w-5 h-5" />
               </button>
@@ -53,7 +53,7 @@ export default function Navbar() {
                       href={link.href}
                       onClick={() => setMobileOpen(false)}
                       className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
+                        isActive ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
@@ -64,13 +64,13 @@ export default function Navbar() {
               })}
             </ul>
 
-            <div className="pt-4 border-t border-gray-200">
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => {
                   setMobileOpen(false)
                   signOut({ callbackUrl: '/login' })
                 }}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors w-full text-left"
+                className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left"
               >
                 <span>Log out</span>
               </button>
@@ -79,10 +79,10 @@ export default function Navbar() {
         </div>
       )}
 
-      <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:bg-white lg:border-r lg:border-gray-200 lg:shadow-sm">
+      <nav className="hidden lg:flex lg:flex-col lg:w-64 lg:h-screen lg:fixed lg:left-0 lg:top-0 lg:bg-white dark:lg:bg-gray-800 lg:border-r lg:border-gray-200 dark:lg:border-gray-700 lg:shadow-sm">
         <div className="flex flex-col h-full p-4">
           <div className="mb-8 px-4 py-3">
-            <h1 className="text-xl font-bold text-blue-600">SmartBank</h1>
+            <h1 className="text-xl font-bold text-blue-600 dark:text-blue-400">SmartBank</h1>
           </div>
 
           <ul className="flex-1 space-y-1">
@@ -94,7 +94,7 @@ export default function Navbar() {
                   <Link
                     href={link.href}
                     className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                      isActive ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-100'
+                      isActive ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -105,10 +105,10 @@ export default function Navbar() {
             })}
           </ul>
 
-          <div className="pt-4 border-t border-gray-200">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={() => signOut({ callbackUrl: '/login' })}
-              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors w-full text-left"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left"
             >
               <span>Log out</span>
             </button>

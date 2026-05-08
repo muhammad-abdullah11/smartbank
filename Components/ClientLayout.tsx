@@ -2,6 +2,7 @@
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
 import Navbar from '@/Components/Navbar'
+import ThemeProvider from '@/Components/ThemeProvider'
 
 const authRoutes = ['/login', '/signup', '/forgot-password', '/verify-email']
 
@@ -16,17 +17,21 @@ export default function ClientLayout({
   if (isAuthRoute) {
     return (
       <SessionProvider>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </SessionProvider>
     )
   }
 
   return (
     <SessionProvider>
-      <Navbar />
-      <main className="lg:ml-64 min-h-screen bg-gray-50">
-        {children}
-      </main>
+      <ThemeProvider>
+        <Navbar />
+        <main className="lg:ml-64 min-h-screen bg-gray-50 dark:bg-gray-900">
+          {children}
+        </main>
+      </ThemeProvider>
     </SessionProvider>
   )
 }

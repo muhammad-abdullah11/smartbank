@@ -110,24 +110,24 @@ export default function TransferPage() {
     if (touched[field as keyof typeof touched] && errors[field as keyof typeof errors]) {
       return base + ' border-red-300 focus:ring-red-500 focus:border-red-500'
     }
-    return base + ' border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+    return base + ' border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-16  md:p-4 sm:p-6 lg:p-8">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-16  md:p-4 sm:p-6 lg:p-8">
       <section className="max-w-2xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Send Money</h1>
-          <p className="mt-1 text-sm text-gray-600">Transfer funds to another SmartBank account</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Send Money</h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Transfer funds to another SmartBank account</p>
         </div>
 
-        <section className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+        <section className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm">
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
             <div>
-              <label htmlFor="toAccountNumber" className="block text-sm font-medium text-gray-700">Recipient (Email or Account Number)</label>
+              <label htmlFor="toAccountNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Recipient (Email or Account Number)</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="h-4 w-4 text-gray-400" />
+                  <FaUser className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   id="toAccountNumber"
@@ -142,15 +142,15 @@ export default function TransferPage() {
                 />
               </div>
               {touched.toAccountNumber && errors.toAccountNumber && (
-                <p className="mt-0.5 text-xs text-red-600">{errors.toAccountNumber}</p>
+                <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.toAccountNumber}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="amount" className="block text-sm font-medium text-gray-700">Amount (RS)</label>
+              <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount (RS)</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-400 text-sm">RS</span>
+                  <span className="text-gray-400 dark:text-gray-500 text-sm">RS</span>
                 </div>
                 <input
                   id="amount"
@@ -167,12 +167,12 @@ export default function TransferPage() {
                 />
               </div>
               {touched.amount && errors.amount && (
-                <p className="mt-0.5 text-xs text-red-600">{errors.amount}</p>
+                <p className="mt-0.5 text-xs text-red-600 dark:text-red-400">{errors.amount}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description (Optional)</label>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description (Optional)</label>
               <div className="mt-1">
                 <input
                   id="description"
@@ -180,7 +180,7 @@ export default function TransferPage() {
                   type="text"
                   value={formData.description}
                   onChange={handleChange}
-                  className="block w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  className="block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   placeholder="What's this transfer for?"
                 />
               </div>
@@ -189,8 +189,8 @@ export default function TransferPage() {
             {apiMessage.message && (
               <div className={`p-3 rounded-md text-sm ${
                 apiMessage.type === 'success' 
-                  ? 'bg-green-50 text-green-700 border border-green-200' 
-                  : 'bg-red-50 text-red-700 border border-red-200'
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800' 
+                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
               }`}>
                 {apiMessage.message}
               </div>
@@ -209,10 +209,10 @@ export default function TransferPage() {
           </form>
         </section>
 
-        <section className="mt-6 bg-blue-50 p-4 rounded-lg">
+        <section className="mt-6 bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
           <div className="flex items-start gap-3">
-            <FaExchangeAlt className="text-blue-600 mt-0.5" />
-            <div className="text-sm text-blue-700">
+            <FaExchangeAlt className="text-blue-600 dark:text-blue-400 mt-0.5" />
+            <div className="text-sm text-blue-700 dark:text-blue-300">
               <p className="font-medium">Transfer Information</p>
               <ul className="mt-1 space-y-1">
                 <li>• Transfers are processed immediately</li>

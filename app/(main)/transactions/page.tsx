@@ -18,14 +18,14 @@ const Transactions = () => {
   const [transactionType, setTransactionsType] = useState<"send" | "receive">("send");
 
   return (
-    <main className="w-full max-w-md m-12 bg-white shadow-lg rounded-2xl p-4">
+    <main className="w-full max-w-md m-12 bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-4">
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setTransactionsType("send")}
           className={`flex-1 py-2 rounded-xl font-medium transition ${
             transactionType === "send"
               ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
           }`}
         >
           Send
@@ -35,7 +35,7 @@ const Transactions = () => {
           className={`flex-1 py-2 rounded-xl font-medium transition ${
             transactionType === "receive"
               ? "bg-blue-600 text-white"
-              : "bg-gray-200 text-gray-700"
+              : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
           }`}
         >
           Receive
@@ -85,16 +85,16 @@ function TransactionList({ type }: { type: "send" | "receive" }) {
         {[...Array(5)].map((_, i) => (
           <div
             key={i}
-            className="flex items-center justify-between bg-gray-50 p-3 rounded-xl animate-pulse"
+            className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-3 rounded-xl animate-pulse"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+              <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
               <div className="space-y-2">
-                <div className="w-32 h-3 bg-gray-300 rounded"></div>
-                <div className="w-24 h-2 bg-gray-200 rounded"></div>
+                <div className="w-32 h-3 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                <div className="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
             </div>
-            <div className="w-16 h-3 bg-gray-300 rounded"></div>
+            <div className="w-16 h-3 bg-gray-300 dark:bg-gray-600 rounded"></div>
           </div>
         ))}
       </div>
@@ -104,20 +104,20 @@ function TransactionList({ type }: { type: "send" | "receive" }) {
   return (
     <div className="space-y-3 max-h-[400px] overflow-y-auto">
       {filtered.length === 0 && (
-        <div className="text-center text-gray-500">No transactions</div>
+        <div className="text-center text-gray-500 dark:text-gray-400">No transactions</div>
       )}
 
       {filtered.map((tx) => (
         <div
           key={tx._id}
-          className="flex items-center justify-between bg-gray-50 p-3 rounded-xl shadow-sm"
+          className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-3 rounded-xl shadow-sm"
         >
           <div className="flex items-center gap-3">
             <div
               className={`p-2 rounded-full ${
                 tx.ledgerType === "DEBIT"
-                  ? "bg-red-100 text-red-600"
-                  : "bg-green-100 text-green-600"
+                  ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                  : "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
               }`}
             >
               {tx.ledgerType === "DEBIT" ? <FaArrowUp /> : <FaArrowDown />}
@@ -129,16 +129,16 @@ function TransactionList({ type }: { type: "send" | "receive" }) {
                   ? `To: ${tx.toAccount.fullName}`
                   : `From: ${tx.fromAccount.fullName}`}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {new Date(tx.createdAt).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-400">{tx.description}</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{tx.description}</p>
             </div>
           </div>
 
           <div
             className={`font-semibold ${
-              tx.ledgerType === "DEBIT" ? "text-red-600" : "text-green-600"
+              tx.ledgerType === "DEBIT" ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"
             }`}
           >
             {tx.ledgerType === "DEBIT" ? "-" : "+"} Rs{" "}
