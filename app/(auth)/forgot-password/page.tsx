@@ -216,22 +216,22 @@ export default function ForgotPasswordForm() {
   }
 
   const getInputClass = (field: string) => {
-    const base = 'block w-full py-2 border text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1 pl-10 pr-3'
+    const base = 'block w-full py-2 border text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1 pl-10 pr-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
     if (touched[field as keyof typeof touched] && errors[field as keyof typeof errors]) {
-      return base + ' border-red-300 focus:ring-red-500 focus:border-red-500'
+      return base + ' border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'
     }
-    return base + ' border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+    return base + ' border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
   }
 
   return (
-    <div className="w-full h-full overflow-hidden bg-white p-4 sm:p-6 shadow-lg rounded-lg" role="main" aria-label="Forgot password page">
+    <div className="w-full h-full overflow-hidden bg-white dark:bg-gray-900 p-4 sm:p-6 shadow-lg rounded-lg" role="main" aria-label="Forgot password page">
       <div className="mx-auto w-full max-w-md">
-        <h1 className="text-center text-lg font-extrabold text-gray-900">
+        <h1 className="text-center text-lg font-extrabold text-gray-900 dark:text-gray-100">
           {step === 'email' && 'Forgot your password?'}
           {step === 'otp' && 'Verify your email'}
           {step === 'reset' && 'Reset your password'}
         </h1>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           {step === 'email' && 'Enter your email address and we will send you a reset code.'}
           {step === 'otp' && 'We sent a 6-digit code to ' + formData.email}
           {step === 'reset' && 'Enter your new password below.'}
@@ -242,7 +242,7 @@ export default function ForgotPasswordForm() {
         {step === 'email' && (
           <form className="space-y-4" onSubmit={handleEmailSubmit} noValidate>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email address</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaEnvelope className="h-4 w-4 text-gray-400" />
@@ -293,8 +293,8 @@ export default function ForgotPasswordForm() {
                   value={digit}
                   onChange={(e) => handleOtpChange(e, index)}
                   onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                  className={'w-12 h-12 text-center text-lg font-bold border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ' + 
-                    (errors.otp && !digit ? 'border-red-300' : 'border-gray-300')
+                  className={'w-12 h-12 text-center text-lg font-bold border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ' + 
+                    (errors.otp && !digit ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-700')
                   }
                   aria-label={'OTP digit ' + (index + 1)}
                 />
@@ -336,7 +336,7 @@ export default function ForgotPasswordForm() {
         {step === 'reset' && (
           <form className="space-y-4" onSubmit={handleResetSubmit} noValidate>
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">New password</label>
+              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">New password</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaLock className="h-4 w-4 text-gray-400" />
@@ -364,7 +364,7 @@ export default function ForgotPasswordForm() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm new password</label>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm new password</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaLock className="h-4 w-4 text-gray-400" />

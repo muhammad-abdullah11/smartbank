@@ -73,18 +73,18 @@ const Profile = () => {
         <div className="w-16 h-16 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold">
           {user.fullName.charAt(0)}
         </div>
-        <h2 className="mt-2 text-lg font-semibold">{user.fullName}</h2>
+        <h2 className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{user.fullName}</h2>
         <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
       </div>
 
       <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Account Number</span>
-          <span className="font-medium">{user.accountNumber}</span>
+          <span className="font-medium text-gray-900 dark:text-gray-100">{user.accountNumber}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Account Type</span>
-          <span className="font-medium capitalize">{user.accountType}</span>
+          <span className="font-medium capitalize text-gray-900 dark:text-gray-100">{user.accountType}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Balance</span>
@@ -97,7 +97,7 @@ const Profile = () => {
       <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Status</span>
-          <span className="font-medium capitalize">{user.accountStatus}</span>
+          <span className="font-medium capitalize text-gray-900 dark:text-gray-100">{user.accountStatus}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Email Verified</span>
@@ -117,23 +117,23 @@ const Profile = () => {
         <h3 className="font-semibold text-gray-700 dark:text-gray-300">Limits</h3>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Daily Limit</span>
-          <span>{user.dailyTransactionLimit}</span>
+          <span className="text-gray-900 dark:text-gray-100">{user.dailyTransactionLimit}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Used Daily</span>
-          <span>{user.usedDailyLimit}</span>
+          <span className="text-gray-900 dark:text-gray-100">{user.usedDailyLimit}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Monthly Limit</span>
-          <span>{user.monthlyTransactionLimit}</span>
+          <span className="text-gray-900 dark:text-gray-100">{user.monthlyTransactionLimit}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Used Monthly</span>
-          <span>{user.usedMonthlyLimit}</span>
+          <span className="text-gray-900 dark:text-gray-100">{user.usedMonthlyLimit}</span>
         </div>
       </div>
 
-      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl space-y-1 text-sm">
+      <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl space-y-1 text-sm text-gray-900 dark:text-gray-100">
         <h3 className="font-semibold text-gray-700 dark:text-gray-300">Address</h3>
         <p>{user.address.street}</p>
         <p>
@@ -148,15 +148,15 @@ const Profile = () => {
         <h3 className="font-semibold text-gray-700 dark:text-gray-300">Dates</h3>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">DOB</span>
-          <span>{new Date(user.dateOfBirth).toLocaleDateString()}</span>
+          <span className="text-gray-900 dark:text-gray-100">{new Date(user.dateOfBirth).toLocaleDateString()}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Created</span>
-          <span>{new Date(user.createdAt).toLocaleString()}</span>
+          <span className="text-gray-900 dark:text-gray-100">{new Date(user.createdAt).toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Last Login</span>
-          <span>{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : "N/A"}</span>
+          <span className="text-gray-900 dark:text-gray-100">{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : "N/A"}</span>
         </div>
       </div>
     </div>

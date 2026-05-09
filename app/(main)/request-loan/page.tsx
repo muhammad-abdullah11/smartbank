@@ -36,20 +36,20 @@ const LoanRequest = () => {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 px-4">
-      <section className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8">
+    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 dark:from-gray-950 dark:to-gray-900 px-4">
+      <section className="w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8">
         <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-slate-800">
+          <h2 className="text-2xl font-semibold text-slate-800 dark:text-white">
             Loan Request
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-slate-500 dark:text-gray-400 mt-1">
             Fill in the details below to request a loan
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
               Amount
             </label>
             <input
@@ -57,13 +57,13 @@ const LoanRequest = () => {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount"
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">
               Duration (months)
             </label>
             <input
@@ -71,13 +71,13 @@ const LoanRequest = () => {
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               placeholder="Enter duration"
-              className="w-full px-4 py-3 overflow-hidden rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              className="w-full px-4 py-3 overflow-hidden rounded-xl border border-slate-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">
               Reason
             </label>
             <textarea
@@ -85,7 +85,7 @@ const LoanRequest = () => {
               onChange={(e) => setReason(e.target.value)}
               placeholder="Explain your reason"
               rows={4}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
               required
             />
           </div>

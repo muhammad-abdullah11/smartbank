@@ -166,26 +166,26 @@ export default function SignupForm() {
   }
 
   const getInputClass = (field: string) => {
-    const base = 'block w-full py-1 border text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1'
+    const base = 'block w-full py-1 border text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
     if (touched[field as keyof typeof touched] && errors[field as keyof typeof errors]) {
-      return base + ' pl-10 pr-3 border-red-300 focus:ring-red-500 focus:border-red-500'
+      return base + ' pl-10 pr-3 border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'
     }
-    return base + ' pl-10 pr-3 border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+    return base + ' pl-10 pr-3 border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
   }
 
   const getAddressInputClass = () => {
-    const base = 'block w-full py-1 border text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1 px-3'
+    const base = 'block w-full py-1 border text-sm rounded-md focus:outline-none focus:ring-1 focus:ring-offset-1 px-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
     if (touched.address && errors.address) {
-      return base + ' border-red-300 focus:ring-red-500 focus:border-red-500'
+      return base + ' border-red-300 dark:border-red-600 focus:ring-red-500 focus:border-red-500'
     }
-    return base + ' border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+    return base + ' border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
   }
 
   return (
-    <div className="w-full h-full overflow-hidden bg-white p-3 sm:p-4 shadow-lg rounded-lg" role="main" aria-label="Sign up page">
+    <div className="w-full h-full overflow-hidden bg-white dark:bg-gray-900 p-3 sm:p-4 shadow-lg rounded-lg" role="main" aria-label="Sign up page">
       <div className="mx-auto w-full max-w-md">
-        <h1 className="text-center text-lg font-extrabold text-gray-900">Create your account</h1>
-        <p className="mt-1 text-center text-xs text-gray-600">
+        <h1 className="text-center text-lg font-extrabold text-gray-900 dark:text-gray-100">Create your account</h1>
+        <p className="mt-1 text-center text-xs text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
           <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
         </p>
@@ -195,7 +195,7 @@ export default function SignupForm() {
         <form className="space-y-2" onSubmit={handleSubmit} noValidate>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
-              <label htmlFor="fullName" className="block text-xs font-medium text-gray-700">Full name</label>
+              <label htmlFor="fullName" className="block text-xs font-medium text-gray-700 dark:text-gray-300">Full name</label>
               <div className="mt-0.5 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaUser className="h-4 w-4 text-gray-400" />
@@ -218,7 +218,7 @@ export default function SignupForm() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-xs font-medium text-gray-700">Email address</label>
+              <label htmlFor="email" className="block text-xs font-medium text-gray-700 dark:text-gray-300">Email address</label>
               <div className="mt-0.5 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaEnvelope className="h-4 w-4 text-gray-400" />
@@ -242,7 +242,7 @@ export default function SignupForm() {
           </div>
 
           <div>
-            <label htmlFor="dateOfBirth" className="block text-xs font-medium text-gray-700">Date of birth</label>
+            <label htmlFor="dateOfBirth" className="block text-xs font-medium text-gray-700 dark:text-gray-300">Date of birth</label>
             <div className="mt-0.5 relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FaCalendar className="h-4 w-4 text-gray-400" />
@@ -264,7 +264,7 @@ export default function SignupForm() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700">Address</label>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">Address</label>
             <div className="mt-0.5 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="sm:col-span-2">
                 <div className="relative rounded-md shadow-sm">
@@ -343,14 +343,14 @@ export default function SignupForm() {
           </div>
 
           <div>
-            <label htmlFor="accountType" className="block text-xs font-medium text-gray-700">Account type</label>
+            <label htmlFor="accountType" className="block text-xs font-medium text-gray-700 dark:text-gray-300">Account type</label>
             <div className="mt-0.5">
               <select
                 id="accountType"
                 name="accountType"
                 value={formData.accountType}
                 onChange={handleChange}
-                className="block w-full px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="block w-full px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               >
                 <option value="savings">Savings</option>
                 <option value="checking">Checking</option>
@@ -360,7 +360,7 @@ export default function SignupForm() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-xs font-medium text-gray-700">Password</label>
+            <label htmlFor="password" className="block text-xs font-medium text-gray-700 dark:text-gray-300">Password</label>
             <div className="mt-0.5 relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FaLock className="h-4 w-4 text-gray-400" />

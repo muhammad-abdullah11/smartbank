@@ -124,7 +124,7 @@ function TransactionList({ type }: { type: "send" | "receive" }) {
             </div>
 
             <div>
-              <p className="text-sm font-semibold">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 {tx.ledgerType === "DEBIT"
                   ? `To: ${tx.toAccount.fullName}`
                   : `From: ${tx.fromAccount.fullName}`}
