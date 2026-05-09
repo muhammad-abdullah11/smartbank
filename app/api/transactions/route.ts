@@ -51,7 +51,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const isReplicaSet = process.env.MONGODB_REPLICA_SET === "true";
+  // Default to true for production safety (MongoDB Atlas uses replica sets)
+  const isReplicaSet = process.env.MONGODB_REPLICA_SET !== "false";
 
   let dbSession: any = null;
   if (isReplicaSet) {
