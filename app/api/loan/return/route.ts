@@ -2,9 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import Loan from "@/Models/loan.Model";
 import User from "@/Models/user.Model";
 import { connectDB } from "@/lib/mongodb";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 
 export async function PATCH(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   await connectDB();
 
   try {
@@ -32,6 +43,10 @@ export async function PATCH(req: NextRequest) {
 
     if (!user) {
       throw new Error("User not found");
+    }
+
+    if (user._id.toString() !== session.user.id) {
+      throw new Error("You can only return your own loans");
     }
 
     if (user.balance < loan.amount) {
