@@ -1,19 +1,40 @@
 import mongoose from "mongoose";
 
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+  throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+}
+
+let cached = (global as any).mongoose;
+
+if (!cached) {
+  cached = (global as any).mongoose = { conn: null, promise: null };
+}
 
 export async function connectDB() {
-    if (mongoose.connections[0].readyState === 1) {
-        return;
-    }
-    try {
-        const MONGODB_URI = "mongodb://localhost:27017/smart-ban";
-        if (!MONGODB_URI) {
-            throw new Error("Please provide MONGO_URL in the environment variables");
-        }
-        const conn = await mongoose.connect(MONGODB_URI);
-        console.log(`MongoDB connected: ${conn.connection.host}`);
-    } catch (error) {
-        console.log(error);
-        throw new Error("Failed to connect to MongoDB");
-    }
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+
+    cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => {
+      console.log(`MongoDB connected: ${mongoose.connection.host}`);
+      return mongoose;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    console.error("MongoDB connection error:", e);
+    throw new Error("Failed to connect to MongoDB");
+  }
+
+  return cached.conn;
 }
