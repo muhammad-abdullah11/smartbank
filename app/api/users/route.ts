@@ -7,9 +7,9 @@ import User from "@/Models/user.Model";
 export async function GET(req: NextRequest) {
 
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user?.id || session.user.role !== "admin") {
         return NextResponse.json(
-            { success: false, message: "Unauthorized" },
+            { success: false, message: "Unauthorized: Admin access required" },
             { status: 401 }
         );
     }

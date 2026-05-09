@@ -9,9 +9,9 @@ import { authOptions } from "@/lib/auth";
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
-  if (session?.user?.role !== "admin") {
+  if (!session?.user || session.user.role !== "admin") {
     return NextResponse.json(
-      { success: false, message: "Unauthorized" },
+      { success: false, message: "Unauthorized: Admin access required" },
       { status: 401 }
     );
   }

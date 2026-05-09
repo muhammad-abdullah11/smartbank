@@ -9,9 +9,9 @@ import { Transitions } from "@/Models/transaction.Model";
 export async function GET() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (!session?.user || session.user.role !== "admin") {
     return NextResponse.json(
-      { success: false, message: "Unauthorized" },
+      { success: false, message: "Unauthorized: Admin access required" },
       { status: 401 }
     );
   }
