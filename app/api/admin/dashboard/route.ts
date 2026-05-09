@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
-import User from "@/Models/user.Model";
+import User, { AccountStatus } from "@/Models/user.Model";
 import Loan from "@/Models/loan.Model";
 import { Transitions } from "@/Models/transaction.Model";
 
@@ -20,7 +20,7 @@ export async function GET() {
     await connectDB();
 
     const totalUsers = await User.countDocuments();
-    const activeUsers = await User.countDocuments({ accountStatus: "active" });
+    const activeUsers = await User.countDocuments({ accountStatus: AccountStatus.ACTIVE });
 
     const balanceAggregation = await User.aggregate([
       { $group: { _id: null, totalBalance: { $sum: "$balance" } } }
