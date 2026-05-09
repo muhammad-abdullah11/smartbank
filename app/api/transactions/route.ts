@@ -11,6 +11,7 @@ import {
 import User from "@/Models/user.Model";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { sendTransferEmail } from "@/lib/nodemailer";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const senderSelect =
-      "balance accountStatus accountLockedUntil failedLoginAttempts dailyTransactionLimit monthlyTransactionLimit usedDailyLimit usedMonthlyLimit";
+      "fullName email accountNumber balance accountStatus accountLockedUntil failedLoginAttempts dailyTransactionLimit monthlyTransactionLimit usedDailyLimit usedMonthlyLimit";
 
     let sender;
     if (isReplicaSet && dbSession) {
@@ -104,11 +105,11 @@ export async function POST(req: NextRequest) {
     let receiver;
     if (isReplicaSet && dbSession) {
       receiver = await User.findOne(receiverQuery)
-        .select("balance accountStatus")
+        .select("fullName email accountNumber balance accountStatus")
         .session(dbSession);
     } else {
       receiver = await User.findOne(receiverQuery).select(
-        "balance accountStatus",
+        "fullName email accountNumber balance accountStatus",
       );
     }
 
@@ -223,6 +224,27 @@ export async function POST(req: NextRequest) {
       await dbSession.commitTransaction();
       dbSession.endSession();
     }
+
+    // Fire emails
+    sendTransferEmail({
+      to: sender.email,
+      userName: sender.fullName,
+      amount,
+      type: LedgerType.DEBIT,
+      accountNumber: sender.accountNumber,
+      otherPartyName: receiver.fullName,
+      balance: sender.balance,
+    }).catch((err) => console.error("Sender email failed:", err));
+
+    sendTransferEmail({
+      to: receiver.email,
+      userName: receiver.fullName,
+      amount,
+      type: LedgerType.CREDIT,
+      accountNumber: receiver.accountNumber,
+      otherPartyName: sender.fullName,
+      balance: receiver.balance,
+    }).catch((err) => console.error("Receiver email failed:", err));
 
     return NextResponse.json(
       {
