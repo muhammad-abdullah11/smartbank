@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaCheckCircle, FaTimesCircle, FaClock, FaSortAmountDown, FaRedo } from "react-icons/fa";
+import { FaCheckCircle, FaTimesCircle, FaClock, FaSortAmountDown, FaRedo, FaHourglassHalf, FaUndo } from "react-icons/fa";
 import Link from "next/link";
 
 type Loan = {
@@ -19,12 +19,14 @@ const statusConfig = {
   APPROVED: { icon: FaCheckCircle, bg: "bg-emerald-50 dark:bg-emerald-900/25", text: "text-emerald-700 dark:text-emerald-300", dot: "bg-emerald-500", label: "Approved" },
   REJECTED: { icon: FaTimesCircle, bg: "bg-rose-50 dark:bg-rose-900/25", text: "text-rose-700 dark:text-rose-300", dot: "bg-rose-500", label: "Rejected" },
   PENDING: { icon: FaClock, bg: "bg-amber-50 dark:bg-amber-900/25", text: "text-amber-700 dark:text-amber-300", dot: "bg-amber-500", label: "Pending" },
+  RETURNED: { icon: FaHourglassHalf, bg: "bg-purple-50 dark:bg-purple-900/25", text: "text-purple-700 dark:text-purple-300", dot: "bg-purple-500", label: "Returned" },
 } as const;
 
 export default function LoansPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchLoans = async () => {
     setLoading(true);
@@ -40,6 +42,19 @@ export default function LoansPage() {
   };
 
   useEffect(() => { fetchLoans() }, []);
+
+  const handleReturnLoan = async (loanId: string) => {
+    setActionLoading(loanId);
+    try {
+      await axios.patch("/api/loan/return", { loanId });
+      await fetchLoans();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to return loan";
+      alert(msg);
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   if (error) {
     return (
@@ -60,26 +75,25 @@ export default function LoansPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 transition-colors">
-      <section className="max-w-6xl mx-auto">
+      <section className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Loan Requests</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {loading ? "Loading..." : `${loans.length} request${loans.length !== 1 ? "s" : ""} found`}
             </p>
-        
           </div>
           <div className="flex gap-3">
-          <Link
-          href="/request-loan"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-gray-800 text-white dark:text-gray-300 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm disabled:opacity-50">
-         Request new loan
-          </Link>
-          <button onClick={fetchLoans} disabled={loading} className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm disabled:opacity-50">
-            <FaRedo className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
-          </button>
+            <Link
+              href="/request-loan"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-gray-800 text-white dark:text-gray-300 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm disabled:opacity-50">
+              Request new loan
+            </Link>
+            <button onClick={fetchLoans} disabled={loading} className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm disabled:opacity-50">
+              <FaRedo className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
+            </button>
+          </div>
         </div>
-          </div>  
 
         <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           {loading ? (
@@ -106,9 +120,9 @@ export default function LoansPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-gray-700">
-                  {["User", "Amount", "Duration", "Reason", "Date", "Status"].map(h => (
-                    <th key={h} className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      <span className="inline-flex items-center gap-1.5">
+                  {["User", "Amount", "Duration", "Reason", "Date", "Status", "Actions"].map(h => (
+                    <th key={h} className={`px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ${h === 'Actions' ? 'text-right' : ''}`}>
+                      <span className={`inline-flex items-center gap-1.5 ${h === 'Actions' ? 'justify-end w-full' : ''}`}>
                         {h === "Amount" && <FaSortAmountDown className="w-3 h-3" />}
                         {h}
                       </span>
@@ -117,9 +131,11 @@ export default function LoansPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
-                {loans.map((loan, idx) => {
+                {loans.map((loan) => {
                   const status = statusConfig[loan.status as keyof typeof statusConfig] || statusConfig.PENDING;
                   const StatusIcon = status.icon;
+                  const isProcessing = actionLoading === loan._id;
+                  
                   return (
                     <tr key={loan._id} className="py-2 group hover:bg-gray-50/80 dark:hover:bg-gray-700/30 transition-colors">
                       <td className="p-6">
@@ -148,6 +164,21 @@ export default function LoansPage() {
                           <StatusIcon className="w-3 h-3" />
                           {status.label}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {loan.status === "APPROVED" && (
+                          <button
+                            onClick={() => handleReturnLoan(loan._id)}
+                            disabled={isProcessing}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-800 rounded-lg text-xs font-medium hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors disabled:opacity-50"
+                          >
+                            {isProcessing ? <FaRedo className="w-3 h-3 animate-spin" /> : <FaUndo className="w-3 h-3" />}
+                            Return Loan
+                          </button>
+                        )}
+                        {loan.status === "RETURNED" && (
+                          <span className="text-xs text-gray-400 italic">Settled</span>
+                        )}
                       </td>
                     </tr>
                   );
