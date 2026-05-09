@@ -1,6 +1,8 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import axios from 'axios'
 import { FaExchangeAlt, FaChartLine, FaShieldAlt, FaUser, FaCreditCard } from 'react-icons/fa'
 
 const bankingFeatures = [
@@ -19,9 +21,53 @@ const securityFeatures = [
   'Secure Password Protection',
 ]
 
+type User = {
+  _id: string;
+  fullName: string;
+  email: string;
+  dateOfBirth: string;
+  accountType: string;
+  balance: number;
+  isEmailVerified: boolean;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  accountStatus: string;
+  failedLoginAttempts: number;
+  dailyTransactionLimit: number;
+  monthlyTransactionLimit: number;
+  usedDailyLimit: number;
+  usedMonthlyLimit: number;
+  accountNumber: string;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt?: string;
+};
+
+
 export default function Home() {
   const { data: session, status } = useSession()
-  const loading = status === 'loading'
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get("/api/users/me");
+        setUser(res.data.user);
+      } catch {
+        setError("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   if (loading) {
     return (
@@ -56,13 +102,12 @@ export default function Home() {
     )
   }
 
-  const user = session?.user
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-16 md:p-4 sm:p-6 lg:p-8">
       <section className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Welcome back, {user?.name || 'User'}</h1>
-        
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Welcome back, {user?.fullName || 'User'}</h1>
+
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 mb-8">
           <div className="bg-white dark:bg-gray-800 p-3 md:p-6 rounded-lg shadow-sm">
             <div className="flex items-center gap-2 mb-2">
@@ -71,7 +116,7 @@ export default function Home() {
             </div>
             <p className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">{user?.accountNumber || 'N/A'}</p>
           </div>
-          
+
           <div className="bg-white dark:bg-gray-800 p-3 md:p-6 rounded-lg shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <FaUser className="text-blue-600 dark:text-blue-400" />
@@ -79,7 +124,7 @@ export default function Home() {
             </div>
             <p className="text-lg md:text-xl font-bold text-green-600 dark:text-green-400">RS {(user?.balance || 0).toFixed(2)}</p>
           </div>
-          
+
           <div className="bg-white dark:bg-gray-800 p-3 md:p-6 rounded-lg shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <FaShieldAlt className="text-blue-600 dark:text-blue-400" />
