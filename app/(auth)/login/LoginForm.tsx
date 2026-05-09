@@ -191,7 +191,16 @@ export default function LoginForm() {
           </div>
 
           {apiError && (
-            <p className="text-center text-sm text-red-600">{apiError}</p>
+            <p 
+              className={`text-center text-sm text-red-600 ${apiError.includes('verify your email') ? 'cursor-pointer hover:underline font-semibold' : ''}`}
+              onClick={() => {
+                if (apiError.includes('verify your email')) {
+                  router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`)
+                }
+              }}
+            >
+              {apiError}
+            </p>
           )}
 
           <div>
