@@ -1,6 +1,6 @@
 'use client'
 import { useState, type ChangeEvent, type FormEvent, type FocusEvent } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
 
@@ -89,7 +89,12 @@ export default function LoginForm() {
         if (result?.error) {
           setApiError(result.error)
         } else {
-          router.push('/')
+          const session = await getSession()
+          if (session?.user?.role === 'admin') {
+            router.push('/dashboard')
+          } else {
+            router.push('/')
+          }
         }
       } catch (error: any) {
         setApiError(error.message || 'Login failed. Please try again.')

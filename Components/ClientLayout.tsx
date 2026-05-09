@@ -13,8 +13,9 @@ export default function ClientLayout({
 }) {
   const pathname = usePathname()
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+  const isAdminRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
 
-  if (isAuthRoute) {
+  if (isAuthRoute || isAdminRoute) {
     return (
       <SessionProvider>
         <ThemeProvider>
