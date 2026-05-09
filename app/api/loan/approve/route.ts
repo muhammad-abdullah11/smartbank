@@ -4,6 +4,7 @@ import User from "@/Models/user.Model";
 import { connectDB } from "@/lib/mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { sendLoanEmail } from "@/lib/nodemailer";
 
 
 export async function PATCH(req: NextRequest) {
@@ -51,7 +52,7 @@ export async function PATCH(req: NextRequest) {
       throw new Error("User account is not active");
     }
 
-    await User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       user._id,
       { $inc: { balance: loan.amount } },
       { new: true }
@@ -59,6 +60,16 @@ export async function PATCH(req: NextRequest) {
 
     loan.status = "APPROVED";
     await loan.save();
+
+    if (updatedUser) {
+      sendLoanEmail({
+        to: updatedUser.email,
+        userName: updatedUser.fullName,
+        amount: loan.amount,
+        status: 'APPROVED',
+        balance: updatedUser.balance
+      }).catch(console.error);
+    }
 
     return NextResponse.json({
       success: true,

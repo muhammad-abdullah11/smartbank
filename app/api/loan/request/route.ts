@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/mongodb";
 import Loan from "@/Models/loan.Model";
+import User from "@/Models/user.Model";
+import { sendLoanEmail } from "@/lib/nodemailer";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -26,12 +28,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const user = await User.findById(session.user.id).select("fullName email");
     const loan = await Loan.create({
       user: session.user.id,
       amount,
       duration,
       reason,
     });
+
+    if (user) {
+      sendLoanEmail({
+        to: user.email,
+        userName: user.fullName,
+        amount,
+        status: 'REQUESTED'
+      }).catch(console.error);
+    }
 
     return NextResponse.json({
       success: true,

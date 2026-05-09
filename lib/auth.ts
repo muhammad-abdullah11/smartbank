@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import { AccountStatus } from '@/Models/user.Model';
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { headers } from 'next/headers';
+import { sendLoginAlertEmail } from '@/lib/nodemailer';
 
 if (!process.env.NEXTAUTH_SECRET) {
   console.warn("WARNING: NEXTAUTH_SECRET is not defined. Authentication will fail in production.");
@@ -51,6 +53,22 @@ export const authOptions: NextAuthOptions = {
         user.accountLockedUntil = undefined;
         user.lastLoginAt = new Date();
         await user.save();
+
+        // Fire login alert email
+        try {
+          const headersList = await headers();
+          const userAgent = headersList.get('user-agent') || 'Unknown Device';
+          const ip = headersList.get('x-forwarded-for')?.split(',')[0] || 'Unknown IP';
+          
+          sendLoginAlertEmail({
+            to: user.email,
+            userName: user.fullName,
+            deviceInfo: userAgent,
+            ip: ip
+          }).catch(err => console.error("Login alert email failed:", err));
+        } catch (err) {
+          console.error("Failed to get headers for login alert:", err);
+        }
 
         return {
           id: user._id.toString(),

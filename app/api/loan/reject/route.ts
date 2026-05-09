@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Loan from "@/Models/loan.Model";
+import User from "@/Models/user.Model";
+import { sendLoanEmail } from "@/lib/nodemailer";
 import { connectDB } from "@/lib/mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -37,8 +39,18 @@ export async function PATCH(req: NextRequest) {
       throw new Error("Only pending loans can be rejected");
     }
     
+    const user = await User.findById(loan.user).select("fullName email");
     loan.status = "REJECTED";
     await loan.save();
+
+    if (user) {
+      sendLoanEmail({
+        to: user.email,
+        userName: user.fullName,
+        amount: loan.amount,
+        status: 'REJECTED'
+      }).catch(console.error);
+    }
 
     return NextResponse.json({
       success: true,
