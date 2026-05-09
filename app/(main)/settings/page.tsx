@@ -1,6 +1,6 @@
 'use client'
 import { FaSun, FaMoon } from 'react-icons/fa'
-import { useTheme } from '@/Components/ThemeProvider'
+import { useTheme } from '@/components/ThemeProvider'
 
 export default function SettingsPage() {
   const { theme, toggleTheme } = useTheme()

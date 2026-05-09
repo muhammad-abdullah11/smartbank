@@ -1,8 +1,8 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
-import Navbar from '@/Components/Navbar'
-import ThemeProvider from '@/Components/ThemeProvider'
+import Navbar from '@/components/Navbar'
+import ThemeProvider from '@/components/ThemeProvider'
 
 const authRoutes = ['/login', '/signup', '/forgot-password', '/verify-email']
 
