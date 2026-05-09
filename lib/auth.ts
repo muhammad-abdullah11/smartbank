@@ -5,6 +5,10 @@ import { AccountStatus } from '@/Models/user.Model';
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
+if (!process.env.NEXTAUTH_SECRET) {
+  console.warn("WARNING: NEXTAUTH_SECRET is not defined. Authentication will fail in production.");
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
