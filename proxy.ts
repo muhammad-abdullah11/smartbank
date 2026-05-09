@@ -1,18 +1,50 @@
-import { getToken } from 'next-auth/jwt'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export async function proxy(request: NextRequest) {
-  const token = await getToken({ req: request })
-  const { pathname } = request.nextUrl
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token;
+    const { pathname } = req.nextUrl;
 
-  if (token && (pathname.startsWith('/login') || pathname.startsWith('/signup') || pathname.startsWith('/verify-email'))) {
-    return NextResponse.redirect(new URL('/', request.url))
+    // Redirect logged-in users away from auth pages
+    if (token && (
+      pathname.startsWith('/login') || 
+      pathname.startsWith('/signup') || 
+      pathname.startsWith('/verify-email') || 
+      pathname.startsWith('/forgot-password')
+    )) {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+
+    return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        const { pathname } = req.nextUrl;
+
+        // Allow access to landing page and auth pages without login
+        if (
+          pathname === "/" ||
+          pathname.startsWith("/login") ||
+          pathname.startsWith("/signup") ||
+          pathname.startsWith("/verify-email") ||
+          pathname.startsWith("/forgot-password") ||
+          pathname.startsWith("/api/auth") // Essential for NextAuth
+        ) {
+          return true;
+        }
+
+        // Require token for all other routes
+        return !!token;
+      },
+    },
+    pages: {
+      signIn: "/login",
+    },
   }
-
-  return NextResponse.next()
-}
+);
 
 export const config = {
-  matcher: ['/login/:path*', '/signup/:path*','/verify-email/:path*'],
-}
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+};
