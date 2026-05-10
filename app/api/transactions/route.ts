@@ -198,7 +198,7 @@ export async function POST(req: NextRequest) {
     ];
 
     if (isReplicaSet && dbSession) {
-      await Transitions.create(transactionData, { session: dbSession });
+      await Transitions.create(transactionData, { session: dbSession, ordered: true });
     } else {
       await Transitions.create(transactionData);
     }
