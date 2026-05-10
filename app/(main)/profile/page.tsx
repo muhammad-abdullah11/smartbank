@@ -68,7 +68,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-w-md m-12 bg-white dark:bg-gray-800 shadow-lg rounded-2xl py-6 space-y-5">
+    <div className="max-w-md md:m-12 bg-white dark:bg-gray-800 py-6 space-y-5">
       <div className="text-center">
         <div className="w-16 h-16 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold">
           {user.fullName.charAt(0)}

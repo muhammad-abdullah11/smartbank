@@ -76,7 +76,7 @@ export default function LoansPage() {
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8 transition-colors">
       <section className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center mt-12 justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Loan Requests</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -95,7 +95,7 @@ export default function LoansPage() {
           </div>
         </div>
 
-        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-auto">
           {loading ? (
             <div className="p-6 space-y-5">
               {[1, 2, 3, 4].map(i => (
