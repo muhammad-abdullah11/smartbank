@@ -117,8 +117,8 @@ export default function TransferPage() {
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-16  md:p-4 sm:p-6 lg:p-8">
       <section className="max-w-2xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Send Money</h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Transfer funds to another SmartBank account</p>
+          <h1 className="text-xl pt-8 text-center sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Send Money</h1>
+          <p className="mt-1 text-sm text-center text-gray-600 dark:text-gray-400">Transfer funds to another SmartBank account</p>
         </div>
 
         <section className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm">
