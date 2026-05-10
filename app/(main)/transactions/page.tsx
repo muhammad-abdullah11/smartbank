@@ -102,50 +102,56 @@ function TransactionList({ type }: { type: "send" | "receive" }) {
   }
 
   return (
-    <div className="space-y-3 max-h-[400px] overflow-y-auto">
-      {filtered.length === 0 && (
-        <div className="text-center text-gray-500 dark:text-gray-400">No transactions</div>
-      )}
+    <div className="max-h-md overflow-hidden mx-auto flex flex-col items-center lg:items-start justify-center gap-4">
+  {filtered.length === 0 && (
+    <div className="text-center text-gray-500 dark:text-gray-400">No transactions</div>
+  )}
 
-      {filtered.map((tx) => (
+  {filtered.map((tx) => (
+    <div
+      key={tx._id}
+      className="w-full max-w-2xl flex flex-col sm:flex-row items-center sm:items-center justify-between gap-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300"
+    >
+      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 text-center sm:text-left">
         <div
-          key={tx._id}
-          className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-3 rounded-xl shadow-sm"
+          className={`p-3 rounded-2xl ${
+            tx.ledgerType === "DEBIT"
+              ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+              : "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+          }`}
         >
-          <div className="flex items-center gap-3">
-            <div
-              className={`p-2 rounded-full ${
-                tx.ledgerType === "DEBIT"
-                  ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-                  : "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-              }`}
-            >
-              {tx.ledgerType === "DEBIT" ? <FaArrowUp /> : <FaArrowDown />}
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                {tx.ledgerType === "DEBIT"
-                  ? `To: ${tx.toAccount.fullName}`
-                  : `From: ${tx.fromAccount.fullName}`}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {new Date(tx.createdAt).toLocaleString()}
-              </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">{tx.description}</p>
-            </div>
-          </div>
-
-          <div
-            className={`font-semibold ${
-              tx.ledgerType === "DEBIT" ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"
-            }`}
-          >
-            {tx.ledgerType === "DEBIT" ? "-" : "+"} Rs{" "}
-            {tx.amount.toLocaleString()}
-          </div>
+          {tx.ledgerType === "DEBIT" ? <FaArrowUp /> : <FaArrowDown />}
         </div>
-      ))}
+
+        <div>
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            {tx.ledgerType === "DEBIT"
+              ? `To: ${tx.toAccount.fullName}`
+              : `From: ${tx.fromAccount.fullName}`}
+          </p>
+
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            {new Date(tx.createdAt).toLocaleString()}
+          </p>
+
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            {tx.description}
+          </p>
+        </div>
+      </div>
+
+      <div
+        className={`text-base font-bold ${
+          tx.ledgerType === "DEBIT"
+            ? "text-red-600 dark:text-red-400"
+            : "text-green-600 dark:text-green-400"
+        }`}
+      >
+        {tx.ledgerType === "DEBIT" ? "-" : "+"} Rs{" "}
+        {tx.amount.toLocaleString()}
+      </div>
     </div>
+  ))}
+</div>
   );
 }
