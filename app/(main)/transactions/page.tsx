@@ -20,7 +20,7 @@ const Transactions = () => {
   );
 
   return (
-    <main className="w-full max-w-md m-12 bg-white dark:bg-gray-800  rounded-2xl py-4 overflow-x-hidden ">
+    <main className="w-full max-w-md mx-auto px-4 m-12 bg-white dark:bg-gray-800  rounded-2xl py-4 overflow-x-hidden ">
       <h2 className="text-3xl  text-center mb-4 font-black tracking-tight text-gray-900 dark:text-white">
         Transactions History
       </h2>
