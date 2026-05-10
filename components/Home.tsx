@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import axios from 'axios'
 import { FaExchangeAlt, FaChartLine, FaShieldAlt, FaUser, FaCreditCard } from 'react-icons/fa'
+import { useRouter } from "next/navigation";
 
 const bankingFeatures = [
   '24/7 Online Banking Access',
@@ -54,6 +55,12 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const router = useRouter();
+
+  if(!session){
+    router.replace("/login")
+  }
+  
 
   useEffect(() => {
     const fetchProfile = async () => {
