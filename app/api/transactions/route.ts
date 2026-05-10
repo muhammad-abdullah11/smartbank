@@ -284,10 +284,7 @@ export async function GET() {
     await connectDB();
 
     const transactions = await Transitions.find({
-      $or: [
-        { toAccount: session.user.id },
-        { fromAccount: session.user.id }
-      ]
+      account: new mongoose.Types.ObjectId(session.user.id)
     })
       .sort({ createdAt: -1 })
       .populate("toAccount", "fullName accountNumber")
