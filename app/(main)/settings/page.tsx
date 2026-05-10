@@ -6,7 +6,7 @@ export default function SettingsPage() {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <div className="max-w-md mx-auto m-12 bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 space-y-6 transition-colors">
+    <div className="md:max-w-md px-8 mx-auto m-12 bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 space-y-6 transition-colors">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Settings</h2>
 
       <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl transition-colors">
